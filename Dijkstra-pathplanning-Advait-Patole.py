@@ -16,7 +16,16 @@ class Node():
 	def __lt__(self, nxt):
 		return self.weight < nxt.weight
 
-def backtrack(node, amg) :
+def backtrack(node, amg, pts) :
+	amg = np.uint8(amg)
+	height, width, layers = amg.shape  
+	video= cv2.VideoWriter('Dijkstra.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 1200, (width,height))
+	for pt in pts :
+		amg[pt[0]][pt[1]] = [255,255,255]
+		video.write(amg) 
+		# cv2.imshow('Path', amg)
+		# cv2.waitKey(1)
+
 	pts = []
 	cost = node.weight
 	while node.parent != None :
@@ -26,12 +35,16 @@ def backtrack(node, amg) :
 
 	npts = pts[::-1]
 	for pt in npts :
-		amg[249-pt[0]][pt[1]] = [0,255,0]
-		cv2.imshow('Path', amg)
-		cv2.waitKey(1)
+		for _ in range(40): 
+			amg[249-pt[0]][pt[1]] = [0,255,0]
+			# cv2.imshow('Path', amg)
+			# cv2.waitKey(1)
+			video.write(amg) 
 
-	cv2.imshow('Path', amg)
-	cv2.waitKey(0)
+	# cv2.imshow('Path', amg)
+	# cv2.waitKey(0)
+	cv2.destroyAllWindows() 
+	video.release()  # releasing the video generated
 
 	print(f'Cost {cost}')
 	return pts, amg
@@ -217,13 +230,6 @@ def findNeigh(node, visited, nodelist, obs):
 		
 	return ne
 
-def explore(aimg, pts) :
-	for pt in pts :
-		amg[pt[0]][pt[1]] = [255,255,255]
-		cv2.imshow('Path', amg)
-		cv2.waitKey(1)
-
-	return amg
 
 def dijkstra(ipoint, fpoint, im, am) :
 	img = im.copy()
@@ -246,8 +252,7 @@ def dijkstra(ipoint, fpoint, im, am) :
 		heapq.heappop(nlist)
 		if pcoord == fpoint[::-1] :
 			print('Goal Reached')
-			amg = explore(amg, allpts)
-			pts, amg = backtrack(pnode, amg)
+			pts, amg = backtrack(pnode, amg, allpts)
 			cv2.imwrite('Path.jpg', amg)
 			break 
 		else :
@@ -280,16 +285,21 @@ if __name__ == "__main__" :
 
 	fpointx = input('Enter final x point')
 	fpointy = input('Enter final y point')
-	ipoint = [int(ipointx),int(ipointy)]
-	fpoint = [int(fpointy),int(fpointx)]
-	print(ipoint[0], ipoint[1], fpoint[0], fpoint[1])
-	
-	if (ipoint[0] < 0 or ipoint[0] > 399 or ipoint[1] < 0 or ipoint[1] > 249) or (fpoint[0] < 0 or fpoint[0] > 249 or fpoint[1] < 0 or fpoint[1] > 399):
-		print('Out of bounds')
+
+	if ipointx.strip() == '' or ipointy.strip() == '' or fpointx.strip() == '' or fpointy.strip() == '' :
+		print('Enter the points to begin the code')
+
 	else :
-		if img[ipoint[1]][ipoint[0]] == 1 or img[fpoint[0]][fpoint[1]] == 1 :
-			print('Given points in obstacle space')
+		ipoint = [int(ipointx),int(ipointy)]
+		fpoint = [int(fpointy),int(fpointx)]
+		print(ipoint[0], ipoint[1], fpoint[0], fpoint[1])
+	
+		if (ipoint[0] < 0 or ipoint[0] > 399 or ipoint[1] < 0 or ipoint[1] > 249) or (fpoint[0] < 0 or fpoint[0] > 249 or fpoint[1] < 0 or fpoint[1] > 399):
+			print('Out of bounds')
 		else :
-			pts = dijkstra(ipoint, fpoint, img, amg)
+			if img[ipoint[1]][ipoint[0]] == 1 or img[fpoint[0]][fpoint[1]] == 1 :
+				print('Given points in obstacle space')
+			else :
+				pts = dijkstra(ipoint, fpoint, img, amg)
 	etime = time.time()
 	print(f'Total Time {etime-stime}')
