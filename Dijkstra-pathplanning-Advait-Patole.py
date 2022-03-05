@@ -23,8 +23,8 @@ def backtrack(node, amg, pts) :
 	for pt in pts :
 		amg[pt[0]][pt[1]] = [255,255,255]
 		video.write(amg) 
-		# cv2.imshow('Path', amg)
-		# cv2.waitKey(1)
+		cv2.imshow('Path', amg)
+		cv2.waitKey(1)
 
 	pts = []
 	cost = node.weight
@@ -35,10 +35,10 @@ def backtrack(node, amg, pts) :
 
 	npts = pts[::-1]
 	for pt in npts :
-		for _ in range(40): 
+		for _ in range(5): 
 			amg[249-pt[0]][pt[1]] = [0,255,0]
-			# cv2.imshow('Path', amg)
-			# cv2.waitKey(1)
+			cv2.imshow('Path', amg)
+			cv2.waitKey(1)
 			video.write(amg) 
 
 	# cv2.imshow('Path', amg)
@@ -82,29 +82,31 @@ def create_map():
 	return m,am
 
 def inObs(x,y,img) :
-	if 250-(y+5) > 0 :
-		if img[249-y-5][x] == 1 : return True
+	for i in range(5) :
+		cl = i
+		if 250-(y+cl) > 0 :
+			if img[249-y-cl][x] == 1 : return True
+			
+		if 250-(y-cl) < 250 :
+			if img[249-(y-cl)][x] == 1 : return True
+			
+		if 250-(y+cl) > 0 and  x+cl < 399 :
+			if img[249-(y+cl)][x+cl] == 1 : return True
 		
-	if 250-(y-5) < 250 :
-		if img[249-(y-5)][x] == 1 : return True
+		if 250-(y+cl) > 0 and x-cl > 0 :
+			if img[249-(y+5)][x-cl] == 1 : return True
 		
-	if 250-(y+5) > 0 and  x+5 < 399 :
-		if img[249-(y+5)][x+5] == 1 : return True
-	
-	if 250-(y+5) > 0 and x-5 > 0 :
-		if img[249-(y+5)][x-5] == 1 : return True
-	
-	if 250-(y-5) < 250 and x+5 < 399:
-		if img[249-(y-5)][x+5] == 1 : return True
+		if 250-(y-cl) < 250 and x+cl < 399:
+			if img[249-(y-cl)][x+cl] == 1 : return True
 
-	if 250-(y-5) < 250 and x-5 > 0: 
-		if img[249-(y-5)][x-5] == 1 : return True
-	
-	if x-5 > 0 :
-		if img[249-y][x-5] == 1 : return True
-	
-	if x+5 < 399:
-		if img[249-y][x+5] == 1 : return True
+		if 250-(y-cl) < 250 and x-cl > 0: 
+			if img[249-(y-cl)][x-cl] == 1 : return True
+		
+		if x-cl > 0 :
+			if img[249-y][x-cl] == 1 : return True
+		
+		if x+cl < 399:
+			if img[249-y][x+cl] == 1 : return True
 		
 	return False
 
@@ -280,24 +282,22 @@ if __name__ == "__main__" :
 	img, amg= create_map()
 	cv2.imwrite('img.jpg', amg)
 
-	ipointx = input('Enter start x point')
-	ipointy = input('Enter start y point')
+	ipointx = input('Enter start x point : ')
+	ipointy = input('Enter start y point : ')
 
-	fpointx = input('Enter final x point')
-	fpointy = input('Enter final y point')
+	fpointx = input('Enter final x point : ')
+	fpointy = input('Enter final y point : ')
 
 	if ipointx.strip() == '' or ipointy.strip() == '' or fpointx.strip() == '' or fpointy.strip() == '' :
 		print('Enter the points to begin the code')
-
 	else :
 		ipoint = [int(ipointx),int(ipointy)]
 		fpoint = [int(fpointy),int(fpointx)]
-		print(ipoint[0], ipoint[1], fpoint[0], fpoint[1])
 	
 		if (ipoint[0] < 0 or ipoint[0] > 399 or ipoint[1] < 0 or ipoint[1] > 249) or (fpoint[0] < 0 or fpoint[0] > 249 or fpoint[1] < 0 or fpoint[1] > 399):
 			print('Out of bounds')
 		else :
-			if img[ipoint[1]][ipoint[0]] == 1 or img[fpoint[0]][fpoint[1]] == 1 :
+			if inObs(ipoint[0],ipoint[1],img) or inObs(fpoint[1],fpoint[0],img) :
 				print('Given points in obstacle space')
 			else :
 				pts = dijkstra(ipoint, fpoint, img, amg)
