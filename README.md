@@ -22,4 +22,4 @@ Inital Map Output
 # ![output](https://github.com/advaitp/Dijkstra-algorithm/blob/main/Map.jpg)
 
 Explored Map 
-# ![output](https://github.com/advaitp/Dijkstra-algorithm/blob/main/Path.jpg)
+# ![output](https://github.com/advaitp/Dijkstra-algorithm/blob/main/Dijkstra.gif)
